@@ -55,4 +55,44 @@ describe LogStash::Filters::Sleep do
       end
     end
   end
+
+
+  describe "replay mode on" do
+    let(:replay) { true}
+    context "when cooldown is N seconds" do
+
+      before(:each) do
+        subject.register
+      end
+
+      let(:messages) { 20 }
+      let(:cooldown) { 5 }
+      subject { LogStash::Filters::Sleep.new("replay" => true, "cooldown" => cooldown ) }
+
+      it "should sleep for N seconds and continue" do
+        expect(subject).to receive(:sleep).with(4..5).exactly(20).times
+        messages.times do
+          subject.filter(event)
+        end
+      end
+    end
+
+    TIMESTAMP = "@timestamp"
+
+    context "when delay is above threshold" do
+      let(:threshold) { 1.0 }
+
+      before(:each) do
+        subject.register
+      end
+
+      subject { LogStash::Filters::Sleep.new("replay" => true, "threshold" => 1 ) }
+      it "should sleep up to threshold and continue" do
+        expect(subject).to receive(:sleep).with(0.0..1.0).exactly(3).times
+
+        subject.filter(LogStash::Event.new({TIMESTAMP => "2015-05-28T23:02:05.350Z"}))
+        subject.filter(LogStash::Event.new(properties))
+      end
+    end
+  end
 end

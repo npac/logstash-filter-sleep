@@ -44,7 +44,7 @@ filter plugins.
 &nbsp;
 
 [id="plugins-{type}s-{plugin}-every"]
-===== `every` 
+===== `every`
 
   * Value type is <<string,string>>
   * Default value is `1`
@@ -61,7 +61,7 @@ Example:
     }
 
 [id="plugins-{type}s-{plugin}-replay"]
-===== `replay` 
+===== `replay`
 
   * Value type is <<boolean,boolean>>
   * Default value is `false`
@@ -73,6 +73,12 @@ Replay mode tries to sleep based on timestamps in each event.
 The amount of time to sleep is computed by subtracting the
 previous event's timestamp from the current event's timestamp.
 This helps you replay events in the same timeline as original.
+You can specify a `threshold` to limit time to sleep.
+No limit is set by default.
+
+If you specify a `cooldown` setting, this will calculate time
+to sleep to ensure minimum length of time that the event
+needs to wait before it can be replayed.
 
 If you specify a `time` setting as well, this filter will
 use the `time` value as a speed modifier. For example,
@@ -85,14 +91,18 @@ For example:
       sleep {
         time => 2
         replay => true
+        threshold => 5
+        cooldown => 30
       }
     }
 
 The above will sleep in such a way that it will perform
 replay 2-times faster than the original time speed.
+The 5 seconds threshold will be used to limit time to sleep.
+Pipeline will sleep as much as needed to ensure 30 seconds cooldown for each event.
 
 [id="plugins-{type}s-{plugin}-time"]
-===== `time` 
+===== `time`
 
   * Value type is <<string,string>>
   * There is no default value for this setting.
